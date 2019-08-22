@@ -1,0 +1,66 @@
+### System
+
+check system $HOST
+	if memory usage > 90% for 5 cycles then alert
+	if swap usage > 25% for 5 cycles then alert
+	if cpu usage > 90% for 5 cycles then alert
+	if loadavg(5min) greater than 4 for 5 cycles then alert
+
+
+### Nginx
+
+check process nginx with pidfile /var/run/nginx.pid
+	start program = "/usr/bin/systemctl start nginx"
+	stop program = "/usr/bin/systemctl stop nginx"
+	restart program = "/usr/bin/systemctl restart nginx"
+	if 3 restarts within 5 cycles then timeout
+
+
+### Apache
+
+check process httpd with pidfile /etc/httpd/run/httpd.pid
+	start program = "/usr/bin/systemctl start httpd"
+	stop program = "/usr/bin/systemctl stop httpd"
+	restart program = "/usr/bin/systemctl restart httpd"
+	if failed host 127.0.0.1 port 80 protocol http
+		and request "/monit.html" with timeout 10 seconds then restart
+	if 3 restarts within 5 cycles then timeout
+
+
+### PHP-FPM
+
+check process php-fpm.www with pidfile /var/run/php-fpm/php-fpm.pid
+	start program = "/usr/bin/systemctl start php-fpm"
+	stop program  = "/usr/bin/systemctl stop php-fpm"
+	if failed host 127.0.0.1 port 9000 for 2 cycles then restart
+	if 3 restarts within 5 cycles then timeout
+
+
+### MariaDB
+
+check process mariadb with pidfile /var/run/mariadb/mariadb.pid
+	start program = "/usr/bin/systemctl start mariadb"
+	stop program = "/usr/bin/systemctl stop mariadb"
+	restart program = "/usr/bin/systemctl restart mariadb"
+	if failed host 127.0.0.1 port 3306 then restart
+	if 3 restarts within 5 cycles then timeout
+
+
+### Memcached
+#   See: https://bugs.centos.org/view.php?id=9570
+
+check process memcached with pidfile /var/run/memcached/memcached.pid
+	start program = "/usr/bin/systemctl start memcached"
+	stop program = "/usr/bin/systemctl stop memcached"
+	if failed host 127.0.0.1 port 11211 protocol MEMCACHE then restart
+	if memory usage > 90% for 5 cycles then restart
+	if 3 restarts within 5 cycles then timeout
+
+
+### Node.js worker
+
+check process node_worker1 matching /home/www/domain/public_html/app.js
+	start program = "/bin/su - www -c 'pm2 start /home/www/domain/public_html/app.js'"
+	stop program = "/bin/su - www -c 'pm2 start /home/www/domain/public_html/app.js'"
+	if cpu > 90% for 3 cycles then restart
+	if 3 restarts within 5 cycles then timeout
