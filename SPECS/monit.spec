@@ -1,7 +1,7 @@
 %define use_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
 Name:					monit
-Version:				5.25.2
+Version:				5.26.0
 Release:				1%{?dist}
 Summary:				Process monitor and restart utility
 
@@ -12,7 +12,7 @@ Source0:				http://mmonit.com/monit/dist/%{name}-%{version}.tar.gz
 Source2:				monitrc
 Source3:				monit.el6.logrotate
 Source4:				monit.el7.logrotate
-Source5:    		    monit.service
+Source5:				monit.service
 Source6:				services-el6-conf
 Source7:				services-el7-conf
 
@@ -94,8 +94,8 @@ fi
 	%systemd_preun monit.service
 %else
 	if [ $1 = 0 ]; then
-			/sbin/service monit stop >/dev/null 2>&1
-			/sbin/chkconfig --del monit
+		/sbin/service monit stop >/dev/null 2>&1
+		/sbin/chkconfig --del monit
 	fi
 %endif
 rm -f /root/.monit.id
@@ -128,6 +128,9 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Thu Aug 22 2019 Karl Johnson <karljohnson.it@gmail.com> - 5.26.0-1
+- Bump to Monit 5.26.0
+
 * Thu Jun 14 2018 Karl Johnson <kjohnson@aerisnetwork.com> - 5.25.2-1
 - Bump to Monit 5.25.2
 
