@@ -2,19 +2,23 @@
 
 Name:					monit
 Version:				5.29.0
-Release:				1%{?dist}
+Release:				2%{?dist}
 Summary:				Process monitor and restart utility
 
 Group:					Utilities/Console
 License:				GPLv3+
 URL:					http://mmonit.com/monit/
 Source0:				http://mmonit.com/monit/dist/%{name}-%{version}.tar.gz
-Source2:				monitrc
-Source3:				monit.el6.logrotate
-Source4:				monit.el7.logrotate
-Source5:				monit.service
-Source6:				services-el6-conf
-Source7:				services-el7-conf
+Source1:				monitrc
+%if %{use_systemd}
+Source2:				monit.service
+Source3:				monit.systemd.logrotate
+Source4:				services.systemd.conf
+%else
+Source3:				monit.rc.logrotate
+Source4:				services.rc.conf
+%endif
+
 
 BuildRoot:				%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -54,24 +58,20 @@ install -m 644 monit.1 %{buildroot}%{_mandir}/man1/monit.1
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 install -p -D -m0755 monit $RPM_BUILD_ROOT%{_bindir}/monit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/monit.d
-install -p -D -m0600 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/monitrc
+install -p -D -m0600 %{SOURCE1} $RPM_BUILD_ROOT%{_sysconfdir}/monitrc
 mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 install -m0600 /dev/null $RPM_BUILD_ROOT%{_localstatedir}/log/monit
+install -p -D -m0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/monit
+install -p -D -m0644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/monit.d/services-example
 
 %if %{use_systemd}
 	mkdir -p ${RPM_BUILD_ROOT}%{_unitdir}
-	install -m0644 %{SOURCE5} ${RPM_BUILD_ROOT}%{_unitdir}/monit.service
-	install -p -D -m0644 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/monit.d/services-exemple
+	install -m0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_unitdir}/monit.service
+	
 %else
 	install -p -D -m0755 system/startup/rc.monit $RPM_BUILD_ROOT%{_initrddir}/monit
-	install -p -D -m0644 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/monit.d/services-exemple
 %endif
 
-%if %{use_systemd}
-	install -p -D -m0644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/monit
-%else
-	install -p -D -m0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/monit
-%endif
 
 %clean
 if [ -d %{buildroot} ] ; then
@@ -128,6 +128,9 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Mon Nov 15 2021 Karl Johnson <karljohnson.it@gmail.com> - 5.29.0-2
+- Add EL8 support
+
 * Tue Aug 24 2021 Karl Johnson <karljohnson.it@gmail.com> - 5.29.0-1
 - Bump to Monit 5.29.0
 
