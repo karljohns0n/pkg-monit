@@ -1,7 +1,7 @@
 %define use_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
 Name:					monit
-Version:				5.30.0
+Version:				5.31.0
 Release:				1%{?dist}
 Summary:				Process monitor and restart utility
 
@@ -128,6 +128,9 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Sun Feb 20 2022 Karl Johnson <karljohnson.it@gmail.com> - 5.31.0-1
+- Bump to Monit 5.31.0
+
 * Wed Feb 2 2022 Karl Johnson <karljohnson.it@gmail.com> - 5.30.0-1
 - Bump to Monit 5.30.0
 
