@@ -1,7 +1,7 @@
 %define use_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
 
 Name:					monit
-Version:				5.31.0
+Version:				5.33.0
 Release:				1%{?dist}
 Summary:				Process monitor and restart utility
 
@@ -22,7 +22,7 @@ Source4:				services.rc.conf
 
 BuildRoot:				%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:			openssl-devel
+BuildRequires:			openssl-devel zlib-devel
 
 %if %{use_systemd}
 BuildRequires:			systemd
@@ -128,6 +128,12 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Tue May 9 2023 Karl Johnson <karljohnson.it@gmail.com> - 5.33.0-1
+- Bump to Monit 5.33.0
+
+* Mon Sep 19 2022 Karl Johnson <karljohnson.it@gmail.com> - 5.32.0-1
+- Bump to Monit 5.32.0
+
 * Sun Feb 20 2022 Karl Johnson <karljohnson.it@gmail.com> - 5.31.0-1
 - Bump to Monit 5.31.0
 
