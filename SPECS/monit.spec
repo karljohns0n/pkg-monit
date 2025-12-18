@@ -1,39 +1,21 @@
-%define use_systemd (0%{?fedora} && 0%{?fedora} >= 18) || (0%{?rhel} && 0%{?rhel} >= 7)
-
 Name:					monit
-Version:				5.33.0
+Version:				5.35.2
 Release:				1%{?dist}
 Summary:				Process monitor and restart utility
 
-Group:					Utilities/Console
-License:				GPLv3+
+License:				AGPL-3.0-or-later
 URL:					http://mmonit.com/monit/
 Source0:				http://mmonit.com/monit/dist/%{name}-%{version}.tar.gz
 Source1:				monitrc
-%if %{use_systemd}
 Source2:				monit.service
 Source3:				monit.systemd.logrotate
 Source4:				services.systemd.conf
-%else
-Source3:				monit.rc.logrotate
-Source4:				services.rc.conf
-%endif
-
-
-BuildRoot:				%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:			openssl-devel zlib-devel
-
-%if %{use_systemd}
 BuildRequires:			systemd
 Requires(post):			systemd, systemd-sysv
 Requires(preun):		systemd
 Requires(postun):		systemd
-%else
-Requires(post):			chkconfig
-Requires(preun):		chkconfig, initscripts
-Requires(postun):		initscripts
-%endif
 
 %description
 monit is a utility for managing and monitoring, processes, files, directories
@@ -41,18 +23,13 @@ and devices on a UNIX system. Monit conducts automatic maintenance and repair
 and can execute meaningful causal actions in error situations.
 
 %prep
-%setup -q
+%autosetup
 
 %build
 %configure --disable-static --with-ssl --without-pam
-make %{?_smp_mflags}
+%make_build
 
 %install
-if [ -d %{buildroot} ] ; then
-	rm -rf %{buildroot}
-fi
-
-
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man1
 install -m 644 monit.1 %{buildroot}%{_mandir}/man1/monit.1
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
@@ -63,63 +40,27 @@ mkdir -p $RPM_BUILD_ROOT%{_localstatedir}/log
 install -m0600 /dev/null $RPM_BUILD_ROOT%{_localstatedir}/log/monit
 install -p -D -m0644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/logrotate.d/monit
 install -p -D -m0644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/monit.d/services-example
-
-%if %{use_systemd}
-	mkdir -p ${RPM_BUILD_ROOT}%{_unitdir}
-	install -m0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_unitdir}/monit.service
-	
-%else
-	install -p -D -m0755 system/startup/rc.monit $RPM_BUILD_ROOT%{_initrddir}/monit
-%endif
-
-
-%clean
-if [ -d %{buildroot} ] ; then
-	rm -rf %{buildroot}
-fi
+mkdir -p ${RPM_BUILD_ROOT}%{_unitdir}
+install -m0644 %{SOURCE2} ${RPM_BUILD_ROOT}%{_unitdir}/monit.service
 
 
 %post
-%if %{use_systemd}
-	%systemd_post monit.service
-%else
-if [ $1 -eq 1 ]; then
-	/sbin/chkconfig --add monit
-fi
-%endif
+%systemd_post monit.service
 
 
 %preun
-%if %{use_systemd}
-	%systemd_preun monit.service
-%else
-	if [ $1 = 0 ]; then
-		/sbin/service monit stop >/dev/null 2>&1
-		/sbin/chkconfig --del monit
-	fi
-%endif
+%systemd_preun monit.service
 rm -f /root/.monit.id
 rm -f /root/.monit.state
 
 
 %postun
-%if %{use_systemd}
-	%systemd_postun_with_restart monit.service
-%else
-	if [ "$1" -ge "1" ]; then
-		/sbin/service monit condrestart >/dev/null 2>&1 || :
-	fi
-%endif
+%systemd_postun_with_restart monit.service
 
 
 %files
-%defattr(-,root,root,-)
 %doc COPYING CHANGES
-%if %{use_systemd}
-	%{_unitdir}/monit.service
-%else
-	%{_initrddir}/monit
-%endif
+%{_unitdir}/monit.service
 %config(noreplace) %{_sysconfdir}/monitrc
 %config(noreplace) %{_sysconfdir}/logrotate.d/monit
 %config %ghost %{_localstatedir}/log/monit
@@ -128,6 +69,11 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Thu Dec 18 2025 Karl Johnson <karljohnson.it@gmail.com> - 5.35.2-1
+- Add EL10 support
+- Bump to Monit 5.35.2
+- Remove EL6 and EL7 support, SysVinit as well
+
 * Tue May 9 2023 Karl Johnson <karljohnson.it@gmail.com> - 5.33.0-1
 - Bump to Monit 5.33.0
 
