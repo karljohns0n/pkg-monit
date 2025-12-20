@@ -314,3 +314,5 @@ set httpd port 2812 and
 #
 #  include /etc/monit.d/*
 #
+
+include /etc/monit.d/*.conf
