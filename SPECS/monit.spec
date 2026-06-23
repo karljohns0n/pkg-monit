@@ -1,5 +1,5 @@
 Name:					monit
-Version:				5.35.2
+Version:				6.0.0
 Release:				1%{?dist}
 Summary:				Process monitor and restart utility
 
@@ -69,6 +69,9 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Tue Jun 23 2026 Karl Johnson <karljohnson.it@gmail.com> - 6.0.0-1
+- Bump to Monit 6.0.0
+
 * Thu Dec 18 2025 Karl Johnson <karljohnson.it@gmail.com> - 5.35.2-1
 - Add EL10 support
 - Bump to Monit 5.35.2
