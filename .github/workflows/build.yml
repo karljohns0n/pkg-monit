@@ -139,7 +139,7 @@ jobs:
           compression-level: 9
 
       - name: Upload build logs
-        if: github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.PKG_NAME }}-el${{ matrix.VERSION }}-${{ matrix.PKG_ARCH }}-logs

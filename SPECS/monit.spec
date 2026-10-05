@@ -1,4 +1,4 @@
-%global upstream_version %(echo %{version} | tr . -)
+%define upstream_version %(echo %{version} | tr . -)
 
 Name:					monit
 Version:				6.1.0
