@@ -1,17 +1,21 @@
+%define upstream_version %(echo %{version} | tr . -)
+
 Name:					monit
-Version:				6.0.0
+Version:				6.1.0
 Release:				1%{?dist}
+
 Summary:				Process monitor and restart utility
 
 License:				AGPL-3.0-or-later
-URL:					http://mmonit.com/monit/
-Source0:				http://mmonit.com/monit/dist/%{name}-%{version}.tar.gz
+URL:					https://github.com/MMonit/monit
+Source0:				https://github.com/MMonit/%{name}/archive/refs/tags/release-%{upstream_version}.tar.gz#/%{name}-%{version}.tar.gz
 Source1:				monitrc
 Source2:				monit.service
 Source3:				monit.systemd.logrotate
 Source4:				services.systemd.conf
 
 BuildRequires:			openssl-devel zlib-devel
+BuildRequires:			autoconf automake libtool bison flex gcc make perl(Pod::Man)
 BuildRequires:			systemd
 Requires(post):			systemd, systemd-sysv
 Requires(preun):		systemd
@@ -23,9 +27,10 @@ and devices on a UNIX system. Monit conducts automatic maintenance and repair
 and can execute meaningful causal actions in error situations.
 
 %prep
-%autosetup
+%autosetup -n %{name}-release-%{upstream_version}
 
 %build
+./bootstrap
 %configure --disable-static --with-ssl --without-pam
 %make_build
 
@@ -69,6 +74,10 @@ rm -f /root/.monit.state
 %{_mandir}/man1/monit.1*
 
 %changelog
+* Mon Oct 5 2026 Karl Johnson <karljohnson.it@gmail.com> - 6.1.0-1
+- Bump to Monit 6.1.0
+- Build from the upstream GitHub tag archive
+
 * Tue Jun 23 2026 Karl Johnson <karljohnson.it@gmail.com> - 6.0.0-1
 - Bump to Monit 6.0.0
 
